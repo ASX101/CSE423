@@ -1,0 +1,158 @@
+from OpenGL.GL import *
+from OpenGL.GLUT import *
+from OpenGL.GLU import *
+
+import random
+
+rain_projection = 0
+background_visibility = 1.0
+count_raindrops = 300
+raindrops = []
+
+def draw_house():
+    glLineWidth(2) 
+    glColor3f(1-background_visibility, 1-background_visibility, 1-background_visibility) 
+    
+    
+    glBegin(GL_LINES)
+    glColor3f(0.5, 0.35, 0.05)
+    glVertex2f(0.5, 0.2) 
+    glVertex2f(0.5, -0.5)
+    glColor3f(0.5, 0.35, 0.05)
+    glVertex2f(-0.5, 0.2) 
+    glVertex2f(0.5, 0.2)
+    glColor3f(0.5, 0.35, 0.05) 
+    glVertex2f(-0.5, -0.5)
+    glVertex2f(-0.5, 0.2)
+    glColor3f(0.5, 0.35, 0.05)
+    glVertex2f(0.5, -0.5) 
+    glVertex2f(-0.5, -0.5)
+
+    glEnd()
+    
+    
+    glBegin(GL_TRIANGLES)
+    glColor3f(0.5, 0.35, 0.05)
+    glVertex2f(-0.7, 0.2)
+    glVertex2f(0.7, 0.2)
+    glVertex2f(0.0, 0.7)
+
+
+    glEnd()
+
+    
+    glBegin(GL_LINES)
+    glColor3f(0.0, 0.0, 1.0)
+    glVertex2f(-0.1, -0.5)
+    glVertex2f(-0.1, -0.2)
+    glVertex2f(0.1, -0.5)
+    glVertex2f(0.1, -0.2)
+    glVertex2f(-0.1, -0.2)
+    glVertex2f(0.1, -0.2)
+
+     
+    glEnd()
+    
+    glPointSize(5)  
+    glBegin(GL_POINTS)
+    glVertex2f(0.05, -0.35)  
+    glEnd()
+    
+    
+
+    
+    glBegin(GL_LINES)
+    glColor3f(0.0, 0.0, 1.0)
+    glVertex2f(0.2, 0.0)
+    glVertex2f(0.4, 0.0)
+    glVertex2f(0.4, 0.0)
+    glVertex2f(0.4, 0.15)
+    glVertex2f(0.4, 0.15)
+    glVertex2f(0.2, 0.15)
+    glVertex2f(0.2, 0.15)
+    glVertex2f(0.2, 0.0)
+    glVertex2f(0.3, 0.0)
+    glVertex2f(0.3, 0.15)
+    glVertex2f(0.2, 0.075)
+    glVertex2f(0.4, 0.075)
+    glEnd()
+    
+def raindrop():
+    global raindrops
+    raindrops = []
+    for i in range(count_raindrops):
+        x = random.uniform(-1, 1)
+        y = random.uniform(5, 10)
+        
+        raindrops.append({'x': x, 'y': y})
+        
+def draw_raindrops():
+    glColor3f(1-background_visibility, 1-background_visibility, 1-background_visibility) 
+    glBegin(GL_LINES)
+    for i in raindrops:
+        glVertex2f(i['x'], i['y'])       
+        glVertex2f(i['x'] + rain_projection * 0.001, i['y'] - 0.1) 
+    glEnd()
+    
+def raindrops_effect():
+    for i in raindrops:
+        i['y'] -= 0.03
+        i['x'] += rain_projection * 0.001  
+        if i['y'] < -1.0:  
+            i['y'] = random.uniform(0.0, 1.0)
+            i['x'] = random.uniform(-1.0, 1.0)
+
+def specialKeyListener(key, x, y):
+    global rain_projection
+    if key == GLUT_KEY_LEFT:
+        rain_projection -= 5  
+    elif key == GLUT_KEY_RIGHT:
+        rain_projection += 5 
+
+def normalKeyListener(key, x, y):
+    global background_visibility
+    if key == b'n':  
+        background_visibility -= 0.1
+        if background_visibility < 0.0:
+            background_visibility = 0.0
+    elif key == b'd': 
+        background_visibility += 0.1
+        if background_visibility> 1.0:
+            background_visibility = 1.0  
+  
+def iterate():
+    glViewport(0, 0, 500, 500)
+    glMatrixMode(GL_PROJECTION)
+    glLoadIdentity()
+    glOrtho(-1.0, 1.0, -1.0, 1.0, -1.0, 1.0)
+    glMatrixMode (GL_MODELVIEW)
+    glLoadIdentity()
+    
+def showScreen():
+    glClearColor(background_visibility, background_visibility, background_visibility, 1)
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+    glLoadIdentity()
+    iterate()
+   
+
+    draw_raindrops()
+    raindrops_effect()
+    draw_house()  
+    
+    glutSwapBuffers()
+    
+def main():    
+    raindrop()
+    glutInit()
+    glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGB)
+    glutInitWindowSize(500, 500) 
+    glutInitWindowPosition(0, 0)
+    glutCreateWindow(b"House in rainfall_task1") 
+    glutDisplayFunc(showScreen)
+    glutIdleFunc(showScreen)
+    glutSpecialFunc(specialKeyListener)
+    glutKeyboardFunc(normalKeyListener)
+    glutMainLoop()
+    
+if __name__ == "__main__":
+    main()
